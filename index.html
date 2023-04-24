@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>read more/less</title>
+</head>
+<body>
+  
+
+  <style>
+.read-more {
+  position: relative;
+  overflow: hidden;
+   padding-bottom: 1rem;
+}
+
+.read-more__content {
+  overflow: hidden;
+  transition: height .3s;
+}
+
+.read-more__footer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.read-more__footer:before {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 80px;
+  top: -80px;
+  left: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+  transition: opacity .3s;
+
+
+}
+
+.read-more.is-active .read-more__footer:before {
+  opacity: 0;
+}
+
+    </style>
+    <h1>read more/less
+     <a href="https://github.com/gonzalote99" >github</a> 
+    </h1>
+    <div style="width: 480px; max-width: 100%;">
+     <div class="read-more" data-more>
+       <div class="read-more__content" data-more-content data-more-height="150" style="height: 150px">
+       <p>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Rerum autem similique debitis, quam officia ipsa
+          consequuntur, eos voluptates sint temporibus ullam qui, commodi id harum veritatis exercitationem! Non, est
+          possimus?
+       </p>
+       <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam tenetur perferendis, distinctio sequi fuga
+        vero. Labore, velit! Atque minima minus, fugit non dolor repellat provident est consequatur blanditiis,
+        temporibus magnam?
+       </p>
+       </div>
+       <div class="read-more__footer" data-more-footer>
+        <a href="#" class="read-more__btn" data-more-trigger data-more-text-more="Read more" data-more-text-less="Read less">read more</a>
+       </div>
+     </div>
+     <br>
+     <div class="read-more" data-more >
+     <div class="read-more__content" data-more-content data-more-height="80" style="height: 80px">
+      <p>
+       Lorem ipsum dolor sit amet, consectetur adipisicing elit. Rerum autem similique debitis, quam officia ipsa
+         consequuntur, eos voluptates sint temporibus ullam qui, commodi id harum veritatis exercitationem! Non, est
+         possimus?
+      </p>
+      <p>
+       Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam tenetur perferendis, distinctio sequi fuga
+       vero. Labore, velit! Atque minima minus, fugit non dolor repellat provident est consequatur blanditiis,
+       temporibus magnam?
+      </p>
+      </div>
+      <div class="read-more__footer" data-more-footer>
+       <a href="#" class="read-more__btn" data-more-trigger data-more-text-more="Read more" data-more-text-less="Read less">read more</a>
+      </div>
+     </div>
+    </div>
+
+    <script>
+   var readMoreLess = function() {
+     if(!Element.prototype.closest) {
+       if(!Element.prototype.matches) {
+         Element.prototype.matches = Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
+       }
+
+       Element.prototype.closest = function(s) {
+          var el = this;
+          var ancestor = this;
+          if(!document.documentElement.contains(el)) return null;
+          do {
+            if(ancestor.matches(s)) return ancestor;
+             ancestor = ancestor.parentElement();
+             
+          } while (ancestor !== null);
+          return null;
+       };
+     }
+
+     var settings = {
+       speed: 300,
+       activeClass: "isActive",
+       selector: '[data-more]',
+       selectorFooter: '[data-more-footer]',
+       selectorTrigger: '[data-more-trigger]',
+       selectorContent: '[data-more-content]',
+
+     };
+
+     var show = function (trigger, target, parent ) {
+       var getHeight = function() {
+        var height = target.scrollHeight + 'px';
+        return height;
+       };
+
+       var height = getHeight();
+       parent.classList.add(settings.activeClass);
+       target.style.height = height;
+
+       var textLess = trigger.dataset.moreTextLess;
+       trigger.textContent = textLess;
+
+       window.setTimeout(function () {
+         target.style.height = '';
+
+       }, settings.speed);
+       
+
+     };
+
+     var hide = function(trigger, target, parent) {
+       var heightDefined = target.dataset.moreHeight;
+       target.style.height = target.scrollHeight + 'px';
+       parent.classList.remove(settings.activeClass);
+
+       var textMore = trigger.dataset.moreTextMore;
+       trigger.textContext = textMore;
+
+
+
+       window.setTimeout(function()  {
+          target.style.height = heightDefined + 'px'
+       }, 1)
+     };
+
+     var toggleContent = function(event, trigger) {
+       var parent = event.target.closest(settings.selector);
+       target = parent.querySelector(settings.selectorContent);
+
+     if(parent.classList.contains(settings.activeClass)) {
+       hide(trigger, target, parent);
+       return;
+     }
+        show(trigger, target, parent);
+     }
+
+
+     var destroy = function(elem) {
+       for (var i = 0; i < elem.length; i++) {
+         var el = contentElements[i],
+         height = el.scrollHeight,
+         heightDefined = el.dataset.moreHeight,
+         parent = el.closest(settings.selector),
+         footer = parent.querySelector(settings.selectorFooter);
+
+
+         if(height > 0 && height === heightDefined) {
+           el.style.height = 'auto';
+           footer.style.display = 'none';
+
+         }
+
+
+
+
+       }
+     };
+
+     var clickHandler = function(event) {
+       var trigger = event.target.closest(settings.selectorTrigger);
+       if(trigger) {
+         event.preventDefault();
+
+         toggleContent(event, trigger);
+       }
+     };
+
+     document.addEventListener('click', clickHandler, false);
+
+     var contentElements = document.querySelectorAll(settings.selectorContent);
+     destroy(contentElements);
+
+    
+   };
+   readMoreLess()
+
+</script>
+
+</body>
+</html>
